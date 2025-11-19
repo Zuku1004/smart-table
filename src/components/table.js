@@ -68,3 +68,6 @@ export function searchMultipleFields(searchField, fields, caseSensitive = false)
         return false;
     };
 }
+
+
+const inputs = elements.controls?.querySelectorAll('select, input[type="text"]') || [];
