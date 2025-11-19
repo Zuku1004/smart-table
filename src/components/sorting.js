@@ -11,14 +11,14 @@ export function initSorting(columns) {
         let field = '';
         let order = 'none';
         
-        // @todo: #3.1 Обработка действий сортировки
+        // Обработка действий сортировки
         if (action && action.dataset?.field) {
             const currentValue = action.dataset.value || 'none';
             action.dataset.value = sortMap[currentValue];
             field = action.dataset.field;
             order = action.dataset.value;
             
-            // @todo: #3.2 Сброс других колонок
+            // Сброс других колонок
             columns.forEach(column => {
                 if (column.dataset.field !== action.dataset.field) {
                     column.dataset.value = 'none';
@@ -26,7 +26,7 @@ export function initSorting(columns) {
             });
         }
         
-        // @todo: #3.3 Применение текущей сортировки
+        // Применение текущей сортировки
         columns.forEach(column => {
             if (column.dataset.value !== 'none') {
                 field = column.dataset.field;

@@ -3,20 +3,18 @@ import { getPages } from '../lib/utils.js';
 export function initPagination(elements, createPage) {
     const { pages, fromRow, toRow, totalRows } = elements;
     
-    // @todo: #2.3 Подготовка шаблона
     let pageTemplate;
-    if (pages.firstElementChild) {
+    if (pages && pages.firstElementChild) {
         pageTemplate = pages.firstElementChild.cloneNode(true);
         pages.firstElementChild.remove();
     }
     
     return (data, state, action) => {
-        // @todo: #2.1 Промежуточные переменные
         const rowsPerPage = state.rowsPerPage;
         const pageCount = Math.ceil(data.length / rowsPerPage);
         let page = Math.max(1, Math.min(state.page, pageCount || 1));
         
-        // @todo: #2.6 Обработка действий
+        // Обработка действий
         if (action) {
             switch(action.name) {
                 case 'prev':
@@ -34,12 +32,12 @@ export function initPagination(elements, createPage) {
             }
         }
         
-        // @todo: #2.2 Пагинация данных
+        // Пагинация данных
         const skip = (page - 1) * rowsPerPage;
         const paginatedData = data.slice(skip, skip + rowsPerPage);
         
-        // @todo: #2.4 Обновление отображения страниц
-        if (pageTemplate) {
+        // Обновление отображения страниц
+        if (pageTemplate && pages) {
             const visiblePages = getPages(page, pageCount, 5);
             const pageElements = visiblePages.map(pageNumber => {
                 const el = pageTemplate.cloneNode(true);
@@ -48,7 +46,7 @@ export function initPagination(elements, createPage) {
             pages.replaceChildren(...pageElements);
         }
         
-        // @todo: #2.5 Статус пагинации
+        // Статус пагинации
         if (fromRow && toRow && totalRows) {
             fromRow.textContent = data.length > 0 ? skip + 1 : 0;
             toRow.textContent = Math.min(skip + rowsPerPage, data.length);
