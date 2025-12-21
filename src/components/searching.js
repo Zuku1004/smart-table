@@ -1,18 +1,15 @@
-import { createComparison, defaultRules, searchMultipleFields } from '../lib/compare.js';
-
-export function initSearching(searchField, searchFields) {
-    return (data, state, action) => {
-        const searchTerm = state[searchField]?.trim();
+export function initSearching({ input }) {
+    return (query, state, action) => {
+        // Проверяем, есть ли текст в поле поиска
+        // state.search содержит значение из поля ввода "search"
+        if (state.search && state.search.trim()) {
+            // Добавляем параметр search к запросу
+            return Object.assign({}, query, { 
+                search: state.search.trim() 
+            });
+        }
         
-        if (!searchTerm) return data;
-        
-        const rules = [
-            defaultRules.skipEmptyTargetValues,
-            searchMultipleFields(searchField, searchFields, false)
-        ];
-        
-        const compare = createComparison([], rules);
-        
-        return data.filter(row => compare(row, { [searchField]: searchTerm }));
+        // Если поле поиска пустое, возвращаем query без изменений
+        return query;
     };
 }

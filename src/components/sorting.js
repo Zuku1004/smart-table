@@ -1,5 +1,3 @@
-import { sortCollection } from '../lib/sort.js';
-
 const sortMap = {
     'none': 'up',
     'up': 'down',
@@ -7,7 +5,7 @@ const sortMap = {
 };
 
 export function initSorting(columns) {
-    return (data, state, action) => {
+    return (query, state, action) => {  // Изменил data на query для ясности
         let field = '';
         let order = 'none';
         
@@ -42,6 +40,10 @@ export function initSorting(columns) {
             column.textContent = baseText + indicator;
         });
         
-        return sortCollection(data, field, order);
+        // Вместо сортировки данных возвращаем параметры для сервера
+        const sort = (field && order !== 'none') ? `${field}:${order}` : null;
+        
+        // Если сортировка есть - добавляем её в query-параметры
+        return sort ? Object.assign({}, query, { sort }) : query;
     };
 }
