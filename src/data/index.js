@@ -1,23 +1,60 @@
-import { generateDataset, indexes } from './dataset.js';
+const BASE_URL = 'https://webinars.webdev.education-services.ru/sp7-api';
+
+// Переменные для кеширования
+let sellers;
+let customers;
+let lastResult;
+let lastQuery;
+
+// Функция преобразования данных с сервера
+const mapRecords = (data) => data.map(item => ({
+    id: item.receipt_id,
+    date: item.date,
+    seller: sellers[item.seller_id],
+    customer: customers[item.customer_id],
+    total: item.total_amount
+}));
 
 export function initData() {
-    const data = generateDataset();
-    
-    return {
-        data,
-        indexes: {
-            categories: indexes.categories.reduce((acc, category) => {
-                acc[category] = category;
-                return acc;
-            }, {}),
-            statuses: indexes.statuses.reduce((acc, status) => {
-                acc[status] = status;
-                return acc;
-            }, {}),
-            sellers: indexes.sellers.reduce((acc, seller) => {
-                acc[seller] = seller;
-                return acc;
-            }, {})
+    // Функция получения индексов (продавцы и покупатели)
+    const getIndexes = async () => {
+        if (!sellers || !customers) {
+            // Запрашиваем продавцов и покупателей параллельно
+            [sellers, customers] = await Promise.all([
+                fetch(`${BASE_URL}/sellers`).then(res => res.json()),
+                fetch(`${BASE_URL}/customers`).then(res => res.json())
+            ]);
         }
+        
+        return { sellers, customers };
+    };
+
+    // Функция получения записей о продажах
+    const getRecords = async (query, isUpdated = false) => {
+        const qs = new URLSearchParams(query);
+        const nextQuery = qs.toString();
+        
+        // Проверка кеша (если параметры не изменились)
+        if (lastQuery === nextQuery && !isUpdated) {
+            return lastResult;
+        }
+        
+        // Запрос к серверу
+        const response = await fetch(`${BASE_URL}/records?${nextQuery}`);
+        const records = await response.json();
+        
+        // Сохраняем в кеш
+        lastQuery = nextQuery;
+        lastResult = {
+            total: records.total,
+            items: mapRecords(records.items)
+        };
+        
+        return lastResult;
+    };
+
+    return {
+        getIndexes,
+        getRecords
     };
 }
