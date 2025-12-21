@@ -11,7 +11,7 @@ const api = initData();
 // Инициализация компонентов (используем sampleTable, а не initTable)
 const { applyPagination, updatePagination } = initPagination(sampleTable.pagination.elements);
 const { applyFiltering, updateIndexes } = initFiltering(sampleTable.filter.elements);
-const applySorting = initSorting(sampleTable.header.elements);
+const applySorting = initSorting(Object.values(sampleTable.header.elements)); // ← ИСПРАВЛЕНО!
 const applySearching = initSearching({ input: sampleTable.search.elements.searchInput });
 
 // Функция сбора состояния из элементов таблицы
@@ -42,7 +42,7 @@ async function render(action) {
     const { total, items } = await api.getRecords(query);
     
     // Обновляем пагинатор с реальным количеством данных
-    updatePagination(total, { page: state.page, limit: state.rowsPerPage });
+    updatePagination(total, query);
     
     // Рендерим таблицу с полученными данными
     sampleTable.render(items);

@@ -1,45 +1,59 @@
-cat > sampleTable.js << 'EOF'
 // sampleTable.js
 export default {
     search: { 
         elements: { 
-            searchInput: document.querySelector('input[name="search"]') 
+            get searchInput() {
+                return document.querySelector('input[name="search"]');
+            }
         } 
     },
     filter: { 
         elements: {
-            searchBySeller: document.querySelector('select[name="seller"]')
+            get searchBySeller() {
+                return document.querySelector('select[name="seller"]');
+            }
         }
     },
     header: { 
         elements: {
-            // Добавьте сюда элементы заголовков для сортировки
-            sortDate: document.querySelector('[data-field="date"]'),
-            sortTotal: document.querySelector('[data-field="total"]')
+            get sortDate() {
+                return document.querySelector('button[data-field="date"]');
+            },
+            get sortTotal() {
+                return document.querySelector('button[data-field="total"]');
+            }
         }
     },
     pagination: { 
         elements: {
-            // Элементы пагинации
+            get pages() {
+                return document.querySelector('[data-name="pages"]');
+            },
+            get fromRow() {
+                return document.querySelector('[data-name="fromRow"]');
+            },
+            get toRow() {
+                return document.querySelector('[data-name="toRow"]');
+            },
+            get totalRows() {
+                return document.querySelector('[data-name="totalRows"]');
+            }
         }
     },
     
     render: function(items) {
         console.log('Rendering table with', items?.length, 'items');
         
-        // Простая отрисовка таблицы
-        const tbody = document.querySelector('tbody');
-        if (tbody && items) {
-            tbody.innerHTML = items.map(item => 
-                `<tr>
-                    <td>${item.id || ''}</td>
-                    <td>${item.date || ''}</td>
-                    <td>${item.seller || ''}</td>
-                    <td>${item.customer || ''}</td>
-                    <td>${item.total || ''}</td>
-                </tr>`
+        const rowsContainer = document.querySelector('[data-name="rows"]');
+        if (rowsContainer && items) {
+            rowsContainer.innerHTML = items.map(item => 
+                `<div class="table-row" role="row">
+                    <div class="table-column" role="cell">${item.date || ''}</div>
+                    <div class="table-column" role="cell">${item.customer || ''}</div>
+                    <div class="table-column" role="cell">${item.seller || ''}</div>
+                    <div class="table-column" role="cell">${item.total || ''}</div>
+                </div>`
             ).join('');
         }
     }
 };
-EOF

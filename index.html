@@ -6,15 +6,12 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Data Table App</title>
+    <link rel="stylesheet" href="/src/style.css" />
 </head>
 
 <body>
     <main id="app" class="container">
-        <!-- Table content will be inserted here -->
-    </main>
-
-    <!-- Search bar template -->
-    <template id="search">
+        <!-- Search bar -->
         <div class="search-bar">
             <label class="search-wrapper" data-name="searchField">
                 <i class="icon search-icon" aria-hidden="true"></i>
@@ -25,81 +22,72 @@
                 <i class="icon reset-icon" aria-hidden="true"></i>
             </button>
         </div>
-    </template>
 
-    <template id="header">
-        <div class="table-row header-row" role="rowgroup">
-            <div class="table-column" role="columnheader">
-                <div class="sortable">
-                    Date
-                    <button type="submit" name="sort" data-field="date" data-value="none" class="icon"
-                        data-name="sortByDate" aria-label="Sort by date"></button>
-                </div>
-            </div>
-            <div class="table-column" role="columnheader">
-                Customer
-            </div>
-            <div class="table-column" role="columnheader">Seller</div>
-            <div class="table-column" role="columnheader">
-                <div class="sortable">
-                    Total
-                    <button type="submit" name="sort" data-field="total" data-value="none" class="icon"
-                        data-name="sortByTotal" aria-label="Sort by total"></button>
-                </div>
-            </div>
-        </div>
-    </template>
-
-    <template id="filter">
-        <div class="table-row filter-row" data-name="filter" role="rowgroup">
-            <div class="table-column">
-                <label class="filter-wrapper">
-                    <input type="text" value="" class="input" placeholder="Search" name="date" data-name="searchByDate">
-                    <button type="submit" name="clear" data-field="date" class="icon"
-                        aria-label="Filter by date"></button>
-                </label>
-            </div>
-            <div class="table-column">
-                <label class="dropdown-select">
-                    <select name="seller" data-name="searchBySeller" aria-label="Filter by seller">
-                        <option value="" selected>—</option>
-                    </select>
-                </label>
-            </div>
-            <div class="table-column">
-                <label class="filter-wrapper">
-                    <input type="text" value="" class="input" name="customer" placeholder="Search"
-                        data-name="searchByCustomer">
-                    <button type="submit" name="clear" data-field="customer" class="icon"
-                        aria-label="Filter by customer"></button>
-                </label>
-            </div>
-
-            <div class="table-column">
-                <div class="range-inputs">
-                    <input type="text" class="input" placeholder="from" name="totalFrom" data-name="totalFrom"
-                        aria-label="Experience from">
-                    <input type="text" class="input" placeholder="to" name="totalTo" data-name="totalTo"
-                        aria-label="Experience to">
-                </div>
-            </div>
-        </div>
-    </template>
-
-    <!-- Table template -->
-    <template id="table">
+        <!-- Table -->
         <form name="table" class="table" style="--columns: 1fr 1fr 1fr 1fr" role="table" aria-label="Data table">
             <!-- Header row -->
+            <div class="table-row header-row" role="rowgroup">
+                <div class="table-column" role="columnheader">
+                    <div class="sortable">
+                        Date
+                        <button type="submit" name="sort" data-field="date" data-value="none" class="icon"
+                            data-name="sortByDate" aria-label="Sort by date"></button>
+                    </div>
+                </div>
+                <div class="table-column" role="columnheader">
+                    Customer
+                </div>
+                <div class="table-column" role="columnheader">Seller</div>
+                <div class="table-column" role="columnheader">
+                    <div class="sortable">
+                        Total
+                        <button type="submit" name="sort" data-field="total" data-value="none" class="icon"
+                            data-name="sortByTotal" aria-label="Sort by total"></button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Filter row -->
+            <div class="table-row filter-row" data-name="filter" role="rowgroup">
+                <div class="table-column">
+                    <label class="filter-wrapper">
+                        <input type="text" value="" class="input" placeholder="Search" name="date" data-name="searchByDate">
+                        <button type="submit" name="clear" data-field="date" class="icon"
+                            aria-label="Filter by date"></button>
+                    </label>
+                </div>
+                <div class="table-column">
+                    <label class="filter-wrapper">
+                        <input type="text" value="" class="input" name="customer" placeholder="Search"
+                            data-name="searchByCustomer">
+                        <button type="submit" name="clear" data-field="customer" class="icon"
+                            aria-label="Filter by customer"></button>
+                    </label>
+                </div>
+                <div class="table-column">
+                    <label class="dropdown-select">
+                        <select name="seller" data-name="searchBySeller" aria-label="Filter by seller">
+                            <option value="" selected>—</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="table-column">
+                    <div class="range-inputs">
+                        <input type="text" class="input" placeholder="from" name="totalFrom" data-name="totalFrom"
+                            aria-label="Total from">
+                        <input type="text" class="input" placeholder="to" name="total" data-name="totalTo"
+                            aria-label="Total to">
+                    </div>
+                </div>
+            </div>
+
             <!-- Table content -->
             <div class="table-content" data-name="rows" role="rowgroup">
                 <!-- Rows will be inserted here -->
             </div>
         </form>
-    </template>
 
-    <!-- Pagination template -->
-    <template id="pagination">
+        <!-- Pagination -->
         <div class="pagination-container">
             <div class="pagination-controls">
                 <button type="submit" name="first" class="pagination-button" data-name="firstPage"
@@ -113,7 +101,7 @@
                 <div class="pagination-pages" data-name="pages" role="group" aria-label="Page navigation">
                     <!-- Page buttons will be generated dynamically -->
                     <label class="pagination-button" aria-label="Goto page 1">
-                        <input type="radio" name="page" value="1">
+                        <input type="radio" name="page" value="1" checked>
                         <span>1</span>
                     </label>
                 </div>
@@ -128,11 +116,11 @@
                 <div class="pagination-status">
                     Showing <span data-name="fromRow">1</span>
                     to <span data-name="toRow">10</span>
-                    of <span data-name="totalRows">200</span> entries
+                    of <span data-name="totalRows">0</span> entries
                 </div>
                 <label class="dropdown-select rows-per-page">
                     <select name="rowsPerPage" data-name="rowsPerPage" aria-label="Rows per page">
-                        <option value="10">10</option>
+                        <option value="10" selected>10</option>
                         <option value="25">25</option>
                         <option value="50">50</option>
                         <option value="100">100</option>
@@ -140,17 +128,7 @@
                 </label>
             </div>
         </div>
-    </template>
-
-    <!-- Row template -->
-    <template id="row">
-        <div class="table-row" role="row">
-            <div class="table-column" data-name="date" role="cell"></div>
-            <div class="table-column" data-name="customer" role="cell"></div>
-            <div class="table-column" data-name="seller" role="cell"></div>
-            <div class="table-column" data-name="total" role="cell"></div>
-        </div>
-    </template>
+    </main>
 
     <script type="module" src="/src/main.js"></script>
 </body>

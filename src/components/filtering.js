@@ -9,12 +9,6 @@ export function initFiltering(elements) {
                     // Очищаем список перед заполнением
                     element.innerHTML = '';
                     
-                    // Добавляем опцию "Все"
-                    const allOption = document.createElement('option');
-                    allOption.value = '';
-                    allOption.textContent = 'Все';
-                    element.append(allOption);
-                    
                     // Добавляем всех продавцов из indexes
                     const values = Object.values(indexes[elementName]);
                     values.forEach(value => {
