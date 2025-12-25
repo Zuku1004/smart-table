@@ -5,7 +5,7 @@ const sortMap = {
 };
 
 export function initSorting(columns) {
-    return (query, state, action) => {  // Изменил data на query для ясности
+    return (query, state, action) => {
         let field = '';
         let order = 'none';
         
@@ -32,18 +32,18 @@ export function initSorting(columns) {
             }
         });
         
-        // Обновление отображения заголовков
-        columns.forEach(column => {
-            const baseText = column.textContent.replace(/[▲▼]$/, '').trim();
-            const indicator = column.dataset.value === 'up' ? ' ▲' : 
-                            column.dataset.value === 'down' ? ' ▼' : '';
-            column.textContent = baseText + indicator;
-        });
+        //  ИСПРАВЛЕНО: Правильное поле для API
+        // Для сервера: date = date, total = total 
+        let serverField = field;
+        if (field === 'date') {
+            serverField = 'date';
+        } else if (field === 'total') {
+            serverField = 'total'; // НЕ total_amount!
+        }
         
-        // Вместо сортировки данных возвращаем параметры для сервера
-        const sort = (field && order !== 'none') ? `${field}:${order}` : null;
+        //  Формат
+        const sort = (serverField && order !== 'none') ? `${serverField}:${order}` : null;
         
-        // Если сортировка есть - добавляем её в query-параметры
         return sort ? Object.assign({}, query, { sort }) : query;
     };
 }

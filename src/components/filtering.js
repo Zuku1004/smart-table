@@ -1,15 +1,12 @@
 export function initFiltering(elements) {
     
-    // Функция для заполнения выпадающих списков (например, продавцами)
     const updateIndexes = (elements, indexes) => {
         if (elements && indexes) {
             Object.keys(indexes).forEach(elementName => {
                 const element = elements[elementName];
                 if (element && indexes[elementName]) {
-                    // Очищаем список перед заполнением
-                    element.innerHTML = '';
+                    element.innerHTML = '<option value="" selected>—</option>';
                     
-                    // Добавляем всех продавцов из indexes
                     const values = Object.values(indexes[elementName]);
                     values.forEach(value => {
                         const option = document.createElement('option');
@@ -22,39 +19,59 @@ export function initFiltering(elements) {
         }
     };
 
-    // Основная функция: формирует параметры фильтрации для сервера
     const applyFiltering = (query, state, action) => {
-        // Очистка фильтров (если нажата кнопка "Очистить")
-        if (action && action.name === 'clearFilters' && elements.controls) {
-            const inputs = elements.controls.querySelectorAll('select, input[type="text"]');
-            inputs.forEach(input => {
-                input.value = '';
-            });
-        }
-
-        // Формируем объект filter для query-параметров
         const filter = {};
         
-        // Проходим по всем элементам фильтрации
-        Object.keys(elements).forEach(key => {
-            const element = elements[key];
-            
-            // Проверяем, что это поле ввода/выбора И у него есть значение
-            if (element && ['INPUT', 'SELECT'].includes(element.tagName) && element.value) {
-                // Ключевое исправление: формируем параметр filter[fieldName]
-                filter[`filter[${element.name}]`] = element.value;
-            }
-        });
+        // Фильтры, которые идут на сервер
+        if (state.date && state.date.trim()) {
+            filter['filter[date]'] = state.date.trim();
+        }
+        
+        if (state.customer && state.customer.trim()) {
+            filter['filter[customer]'] = state.customer.trim();
+        }
+        
+        if (state.seller && state.seller.trim()) {
+            filter['filter[seller]'] = state.seller.trim();
+        }
 
-        // Если есть какие-то фильтры - добавляем их к query
         return Object.keys(filter).length > 0 
             ? Object.assign({}, query, filter) 
             : query;
     };
 
-    // Возвращаем две функции вместо одной
+    //  НОВАЯ ФУНКЦИЯ: Фильтрация по Total на клиенте
+    const applyClientFiltering = (items, state) => {
+        let filteredItems = [...items];
+
+        // Фильтр по totalFrom (от)
+        if (state.totalFrom && state.totalFrom.trim()) {
+            const minTotal = parseFloat(state.totalFrom);
+            if (!isNaN(minTotal)) {
+                filteredItems = filteredItems.filter(item => {
+                    const itemTotal = parseFloat(item.total);
+                    return !isNaN(itemTotal) && itemTotal >= minTotal;
+                });
+            }
+        }
+
+        // Фильтр по total (до)
+        if (state.total && state.total.trim()) {
+            const maxTotal = parseFloat(state.total);
+            if (!isNaN(maxTotal)) {
+                filteredItems = filteredItems.filter(item => {
+                    const itemTotal = parseFloat(item.total);
+                    return !isNaN(itemTotal) && itemTotal <= maxTotal;
+                });
+            }
+        }
+
+        return filteredItems;
+    };
+
     return {
         updateIndexes,
-        applyFiltering
+        applyFiltering,
+        applyClientFiltering //  Экспортирую новую функцию
     };
 }

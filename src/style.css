@@ -484,3 +484,15 @@ button.icon:hover,
         flex-direction: column;
     }
 }
+/* Визуальное отображение сортировки */
+.sortable button[data-value="none"] {
+    background-image: url("./assets/sort.svg");
+}
+
+.sortable button[data-value="up"] {
+    background-image: url("./assets/arrow-up.svg");
+}
+
+.sortable button[data-value="down"] {
+    background-image: url("./assets/arrow-down.svg");
+}

@@ -1,20 +1,17 @@
-import { initData } from './data/index.js';
+import { initData } from './data.js';
 import sampleTable from './sampleTable.js';
 import { initPagination } from './components/pagination.js';
 import { initSorting } from './components/sorting.js';
 import { initFiltering } from './components/filtering.js';
 import { initSearching } from './components/searching.js';
 
-// Инициализация API (БЕЗ передачи sourceData)
 const api = initData();
 
-// Инициализация компонентов (используем sampleTable, а не initTable)
 const { applyPagination, updatePagination } = initPagination(sampleTable.pagination.elements);
-const { applyFiltering, updateIndexes } = initFiltering(sampleTable.filter.elements);
-const applySorting = initSorting(Object.values(sampleTable.header.elements)); // ← ИСПРАВЛЕНО!
+const { applyFiltering, updateIndexes, applyClientFiltering } = initFiltering(sampleTable.filter.elements);
+const applySorting = initSorting(Object.values(sampleTable.header.elements));
 const applySearching = initSearching({ input: sampleTable.search.elements.searchInput });
 
-// Функция сбора состояния из элементов таблицы
 function collectState() {
     return {
         page: parseInt(document.querySelector('input[name="page"]:checked')?.value) || 1,
@@ -23,43 +20,39 @@ function collectState() {
         customer: document.querySelector('input[name="customer"]')?.value || '',
         date: document.querySelector('input[name="date"]')?.value || '',
         total: document.querySelector('input[name="total"]')?.value || '',
+        totalFrom: document.querySelector('input[name="totalFrom"]')?.value || '',
         search: document.querySelector('input[name="search"]')?.value || ''
     };
 }
 
-// Основная асинхронная функция рендера
 async function render(action) {
     let state = collectState();
-    let query = {}; // Объект для параметров запроса к серверу
+    let query = {};
     
-    // Формируем параметры запроса (в правильном порядке)
     query = applySearching(query, state, action);
     query = applyFiltering(query, state, action);
     query = applySorting(query, state, action);
     query = applyPagination(query, state, action);
     
-    // Получаем данные с сервера сформированными параметрами
     const { total, items } = await api.getRecords(query);
     
-    // Обновляем пагинатор с реальным количеством данных
-    updatePagination(total, query);
+    // Применяем клиентскую фильтрацию по Total
+    const filteredItems = applyClientFiltering(items, state);
     
-    // Рендерим таблицу с полученными данными
-    sampleTable.render(items);
+    // Обновляем пагинатор с учётом клиентской фильтрации
+    updatePagination(filteredItems.length, query);
+    
+    sampleTable.render(filteredItems);
 }
 
-// Асинхронная инициализация приложения
 async function init() {
     try {
-        // Получаем индексы (списки продавцов и покупателей) с сервера
         const indexes = await api.getIndexes();
         
-        // Заполняем выпадающий список продавцов
         updateIndexes(sampleTable.filter.elements, {
             searchBySeller: indexes.sellers
         });
         
-        // Первоначальный рендер
         await render();
         
     } catch (error) {
@@ -67,22 +60,53 @@ async function init() {
     }
 }
 
-// Инициализация приложения после загрузки DOM
 document.addEventListener('DOMContentLoaded', () => {
-    // Запускаем init, а затем устанавливаем render как обработчик событий
     init().then(() => {
-        // Привязываем обработчики событий ко всем кликабельным элементам
+        
+        // Кнопка Reset all filters
+        const resetButton = document.querySelector('button[data-name="reset"]');
+        if (resetButton) {
+            resetButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                document.querySelectorAll('input[type="text"]').forEach(input => {
+                    input.value = '';
+                });
+                
+                document.querySelectorAll('select').forEach(select => {
+                    select.selectedIndex = 0;
+                });
+                
+                const firstPageRadio = document.querySelector('input[name="page"][value="1"]');
+                if (firstPageRadio) {
+                    firstPageRadio.checked = true;
+                }
+                
+                render({ name: 'reset' });
+            });
+        }
+        
+        // Обработка кликов на кнопки сортировки
+        const sortButtons = document.querySelectorAll('button[data-field]');
+        sortButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                render(button);
+            });
+        });
+        
+        // Обработка кликов на другие кнопки (пагинация)
         document.addEventListener('click', (event) => {
             const target = event.target;
             
-            // Обрабатываем только элементы с data-action или теги button, input, select
-            if (target.hasAttribute('data-action') || 
-                ['BUTTON', 'INPUT', 'SELECT', 'A'].includes(target.tagName)) {
+            if (target.tagName === 'BUTTON' && target.name && !target.dataset.field) {
+                render(target);
+            } else if (target.tagName === 'INPUT' && target.type === 'radio') {
                 render(target);
             }
         });
         
-        // Обработка изменения значения в select для rowsPerPage
+        // Обработка изменения rowsPerPage
         const rowsPerPageSelect = document.querySelector('select[name="rowsPerPage"]');
         if (rowsPerPageSelect) {
             rowsPerPageSelect.addEventListener('change', () => {
@@ -90,27 +114,24 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
         
-        // Обработка ввода в текстовые поля фильтров с debounce
+        // Обработка изменения seller
+        const sellerSelect = document.querySelector('select[name="seller"]');
+        if (sellerSelect) {
+            sellerSelect.addEventListener('change', () => {
+                render();
+            });
+        }
+        
+        // Обработка ввода в текстовые поля с debounce
         let searchTimeout;
-        const textInputs = document.querySelectorAll('input[type="text"]:not([name="search"])');
+        const textInputs = document.querySelectorAll('input[type="text"]');
         textInputs.forEach(input => {
             input.addEventListener('input', () => {
                 clearTimeout(searchTimeout);
                 searchTimeout = setTimeout(() => {
                     render();
-                }, 300); // Задержка 300 мс
-            });
-        });
-        
-        // Обработка ввода в поле поиска с debounce
-        const searchInput = document.querySelector('input[name="search"]');
-        if (searchInput) {
-            searchInput.addEventListener('input', () => {
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(() => {
-                    render();
                 }, 300);
             });
-        }
+        });
     });
 });

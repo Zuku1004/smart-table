@@ -1,4 +1,4 @@
-// sampleTable.js
+//  ИСПРАВЛЕНО: Добавлены все элементы фильтров
 export default {
     search: { 
         elements: { 
@@ -11,6 +11,19 @@ export default {
         elements: {
             get searchBySeller() {
                 return document.querySelector('select[name="seller"]');
+            },
+            //  ДОБАВЛЕНО: Элементы для фильтрации
+            get searchByCustomer() {
+                return document.querySelector('input[name="customer"]');
+            },
+            get searchByDate() {
+                return document.querySelector('input[name="date"]');
+            },
+            get totalFrom() {
+                return document.querySelector('input[name="totalFrom"]');
+            },
+            get totalTo() {
+                return document.querySelector('input[name="total"]');
             }
         }
     },
